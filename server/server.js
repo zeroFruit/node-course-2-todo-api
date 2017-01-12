@@ -25,7 +25,17 @@ app.post('/todos', (req, res) => {
   });
 });
 
-
+app.get('/todos', (req, res) => {
+  Todo.find().then((todos) => {
+    /* This is much better way with sending as object
+      because sending as object can open the extendability
+      we can add server status, other properties
+    */
+    res.send({todos});
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
 
 app.listen(3000, () => {
   console.log('Started on port 3000');
