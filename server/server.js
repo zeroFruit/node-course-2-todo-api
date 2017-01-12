@@ -1,3 +1,5 @@
+require('./config/config');
+
 const _           = require('lodash');
 const express     = require('express');
 const bodyParser  = require('body-parser');
@@ -8,7 +10,7 @@ const {Todo}      = require('./models/todo');
 const {User}      = require('./models/user');
 
 var app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 /*
   Inside app.use, locate 3rd-party middleware or custom middleware

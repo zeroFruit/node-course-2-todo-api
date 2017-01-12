@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
   the other is for our local machine
 */
 mongoose.Promise = global.Promise; // now mongoose can use Promise
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp');
+mongoose.connect(process.env.MONGODB_URI);
 
 module.exports = {
   mongoose
