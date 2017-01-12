@@ -107,3 +107,52 @@ describe('GET /todos/:id', () => {
       .end(done);
   });
 });
+
+describe('DELETE /todos/:id', () => {
+  it('should remove a todo', (done) => {
+      /*
+        Because removing data from data is Async function, used done.
+        At end() which means received HTTP response, execute done.
+        Because receiving HTTP response means all database work has finished which also means
+        asynchronous callback function is finally finished.
+      */
+      var hexId = todos[1]._id.toHexString();
+
+      request(app)
+        .delete(`/todos/${hexId}`)
+        .expect(200)
+        .expect((response) => {
+          expect(response.body.todo._id).toBe(hexId);
+        })
+        .end((err, response) => {
+          /* The last thing to test is quering to database to check whether data is
+            actually deleted.
+          */
+          if (err) {
+            return done(err); // pass done a @err to notice mocha the error message
+          }
+          Todo.findById(hexId).then((todo) => {
+            expect(todo).toNotExist();
+            done();
+          }).catch((e) => done(e));
+        });
+  });
+
+  it('should return 404 if todo not found', (done) => {
+    var hexId = new ObjectID().toHexString();
+
+    request(app)
+      .delete(`/todos/${hexId}`)
+      .expect(404)
+      .end(done)
+  });
+
+  it('should return 404 if object id is invalid', (done) => {
+    var hexId = new ObjectID().toHexString();
+
+    request(app)
+      .delete(`/todos/${hexId}`)
+      .expect(404)
+      .end(done)
+  });
+});
