@@ -2,6 +2,7 @@ const {mongoose}  = require('../db/mongoose');
 const validator   = require('validator');
 const jwt         = require('jsonwebtoken');
 const _           = require('lodash');
+const bcrypt      = require('bcryptjs');
 
 /* Store the schema of user model */
 var UserSchema = new mongoose.Schema({
@@ -93,6 +94,59 @@ UserSchema.statics.findByToken = function (token) {
     'tokens.access': 'auth'
   });
 };
+
+UserSchema.statics.findByCredentials = function (email, password) {
+  var User = this;
+
+  return User.findOne({email}).then((user) => {
+    if (!user) {
+      return Promise.reject(); /* .catch block is exe */
+    }
+
+    return new Promise((resolve, reject) => { /* should return Promise to chaining Promise */
+      bcrypt.compare(password, user.password, (err, result) => {
+        if (err) {
+          reject();
+        }
+        if (result) {
+          resolve(user);
+        }
+        else {
+          reject();
+        }
+      });
+    });
+  }); /* chaining Promise by return Promise */
+};
+
+/*
+  Mongoose middleware, in this case everytime before @save function is executed
+  pre middleware is executed. In this case before save user password in db, hash it first.
+*/
+UserSchema.pre('save', function (next) {
+  var user = this;
+  var password = user.password;
+  /* before going hashing process, should check whether password was modiefied
+    There are some cases when password is not updated. (updated user info other than password or when user is new)
+    In that case, this middleware must not execute.
+  */
+  if (user.isModified('password')) {
+    /* if password is modified program should hash it */
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(password, salt, (err, hash) => {
+        if (err) {
+
+        }
+        user.password = hash; /* override hashed password with plain password */
+        next();
+      })
+    })
+  }
+  else {
+    /* if not modified just pass */
+    next();
+  }
+});
 
 var User = mongoose.model('User', UserSchema);
 

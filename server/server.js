@@ -120,7 +120,23 @@ app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
 
+// POST /users/login {email, password}
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
 
+  /*
+    Tip, Strategy
+      call method first, so we can find what this method should do
+  */
+  User.findByCredentials(body.email, body.password).then((user) => {
+    // then send back a token
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user); /* checking whether there's user params is determined by findByCredentials method */
+    });
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
 
 /* private route */
 app.get('/users/me', authenticate, (req, res) => {
