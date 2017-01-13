@@ -116,9 +116,6 @@ app.post('/users', (req, res) => {
   }).catch((e) => res.status(400).send(e));
 });
 
-app.listen(port, () => {
-  console.log(`Started on port ${port}`);
-});
 
 // POST /users/login {email, password}
 app.post('/users/login', (req, res) => {
@@ -141,6 +138,10 @@ app.post('/users/login', (req, res) => {
 /* private route */
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
+});
+
+app.listen(port, () => {
+  console.log(`Started on port ${port}`);
 });
 
 module.exports = {app};
