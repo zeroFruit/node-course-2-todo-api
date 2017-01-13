@@ -66,6 +66,16 @@ UserSchema.methods.generateAuthToken = function () {
   });
 };
 
+UserSchema.methods.removeToken = function (token) {
+  var user = this;
+
+  return user.update({
+    $pull: { /* if token match with data then pull (remove) that token property*/
+      tokens: { token }
+    }
+  });
+};
+
 /*
   findByToken make as User class static function, so any instance can use it
   */
