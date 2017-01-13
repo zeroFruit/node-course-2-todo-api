@@ -8,6 +8,7 @@ const {ObjectID}  = require('mongodb');
 const {mongoose}  = require('./db/mongoose');
 const {Todo}      = require('./models/todo');
 const {User}      = require('./models/user');
+const {authenticate} = require('./middleware/authenticate');
 
 var app = express();
 const port = process.env.PORT;
@@ -99,10 +100,31 @@ app.patch('/todos/:id', (req, res) => {
 });
 
 
+// POST /users
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body); // if one of info is not provided new User throw err by validator
 
+  user.save().then(() => {
+    /* When new user is signed up then send back token to them. */
+    return user.generateAuthToken(); // will return auth token
+  }).then((token) => {
+    /* send auth token to user inside HTTP header
+      x- prefix means this is custom header
+    */
+    res.header('x-auth', token).send(user);
+  }).catch((e) => res.status(400).send(e));
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
-})
+});
+
+
+
+/* private route */
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+});
 
 module.exports = {app};
