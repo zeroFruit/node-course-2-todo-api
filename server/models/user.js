@@ -57,7 +57,7 @@ UserSchema.methods.generateAuthToken = function () {
   */
   var user = this; // user.generateAuthToken, so @this points to user instance
   var access = 'auth';
-  var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123' /* this is server jwt secret and will move on to config file */).toString();
+  var token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET /* this is server jwt secret and will move on to config file */).toString();
 
   user.tokens.push({ access, token }); /* update user property */
 
@@ -87,7 +87,7 @@ UserSchema.statics.findByToken = function (token) {
     /* because .verify() throw an error when something goes wrong
       every error catch inside catch-clause
     */
-    decoded = jwt.verify(token, 'abc123');
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
 
   } catch (e) {
     // return new Promise((resolve, reject) => {
